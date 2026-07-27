@@ -212,21 +212,6 @@ mvn spring-boot:run
 
 ---
 
-## Future Improvements
-
-- JWT Authentication
-- Spring Security
-- Role-Based Authorization
-- Email Notifications
-- Hotel Images Upload
-- Reviews & Ratings
-- Swagger Documentation
-- Docker Support
-- Deployment on AWS/Render
-- Redis Caching
-
----
-
 ## 👨‍💻 Author
 
 **Anant Gupta**
