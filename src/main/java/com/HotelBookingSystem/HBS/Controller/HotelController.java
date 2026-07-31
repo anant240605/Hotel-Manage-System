@@ -1,13 +1,12 @@
 package com.HotelBookingSystem.HBS.Controller;
+import com.HotelBookingSystem.HBS.DTO.HotelResponse;
 import com.HotelBookingSystem.HBS.Entity.Hotel;
 import com.HotelBookingSystem.HBS.Services.HotelServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.concurrent.ExecutionException;
-
+import java.util.List;
 @RestController
 @RequestMapping("hotel")
 public class HotelController {
@@ -27,7 +26,7 @@ public class HotelController {
     @GetMapping("{city}")
     public ResponseEntity<?> getHotelByCity(@PathVariable String city){
         try{
-          Hotel hotel=  hotelServices.getHotelByCity(city);
+          List<HotelResponse> hotel =  hotelServices.getHotelByCity(city);
             return  new ResponseEntity<>(hotel, HttpStatus.OK);
         }catch (Exception e){
             return   ResponseEntity.badRequest().body(e.getMessage());

@@ -1,6 +1,5 @@
 package com.HotelBookingSystem.HBS.Repository;
 
-import com.HotelBookingSystem.HBS.Entity.Hotel;
 import com.HotelBookingSystem.HBS.Entity.Room;
 import com.HotelBookingSystem.HBS.Entity.RoomType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,7 +15,6 @@ public interface RoomRepo extends JpaRepository<Room, Long > {
            RoomType roomType,
            String available
    );
-
 
    List<Room> findByHotelIdAndRoomType(Long hotelId, RoomType roomType);
 }

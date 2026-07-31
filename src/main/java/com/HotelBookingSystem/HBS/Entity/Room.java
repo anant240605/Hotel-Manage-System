@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
-
 @Entity
  @Table(name="rooms")
 @Data
@@ -34,5 +33,7 @@ public class Room {
     @JoinColumn(name = "hotel_id")
     @JsonIgnore
     private Hotel hotel;
+
+
 
 }

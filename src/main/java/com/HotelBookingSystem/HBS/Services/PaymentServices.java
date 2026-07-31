@@ -13,7 +13,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PaymentServices {
-
+    @Autowired
+    private EmailService emailService;
     @Autowired
     private PaymentRepo paymentRepository;
 
@@ -31,7 +32,7 @@ public class PaymentServices {
             throw new RuntimeException("Booking Already Paid");
         }
 
-        if(booking.getStatus()==BookingStatus.CANCELLED){
+        if(booking.getStatus()== BookingStatus.CANCELLED){
             throw new RuntimeException("Booking Cancelled");
         }
 
@@ -54,6 +55,7 @@ public class PaymentServices {
         paymentRepository.save(payment);
 
         bookingRepository.save(booking);
+        emailService.sendBookingConfirmation(booking);
 
         return payment;
 

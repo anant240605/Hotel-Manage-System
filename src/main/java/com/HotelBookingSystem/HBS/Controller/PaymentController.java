@@ -1,6 +1,7 @@
 package com.HotelBookingSystem.HBS.Controller;
 
 import com.HotelBookingSystem.HBS.DTO.PaymentRequest;
+import com.HotelBookingSystem.HBS.Repository.PaymentRepo;
 import com.HotelBookingSystem.HBS.Services.PaymentServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,12 +13,14 @@ import org.springframework.web.bind.annotation.*;
 public class PaymentController {
     @Autowired
     private PaymentServices paymentServices;
+    @Autowired
+    private PaymentRepo paymentRepo;
     @PostMapping
     public ResponseEntity<?> makePayment(
             @RequestBody PaymentRequest request){
           try{
               paymentServices.makePayment(request);
-              return new ResponseEntity<>("Payment Successfull", HttpStatus.OK);
+              return new ResponseEntity<>("Payment Successfull Conformation details will be send to your email ", HttpStatus.OK);
 
           }catch (Exception e){
               return  new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -45,9 +48,6 @@ public class PaymentController {
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
-
-
-
     }
 
     @PutMapping("/refund/{bookingId}")
@@ -56,11 +56,10 @@ public class PaymentController {
         try {
             paymentServices.refundPayment(bookingId);
             return new ResponseEntity<>("Payment will be refunded", HttpStatus.OK);
+
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.OK);
         }
-
-
 
     }
 }

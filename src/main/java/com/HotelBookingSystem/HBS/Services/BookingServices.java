@@ -7,113 +7,136 @@ import com.HotelBookingSystem.HBS.Repository.HotelRepo;
 import com.HotelBookingSystem.HBS.Repository.RoomRepo;
 import com.HotelBookingSystem.HBS.Repository.UserRepo;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.ObjectProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Book;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-import java.util.ResourceBundle;
-
 
 @Service
+@RequiredArgsConstructor
 public class BookingServices {
-    @Autowired
-     private BookingRepo bookingRepo;
-    @Autowired
-    private UserRepo userRepo;
-    @Autowired
-    private HotelRepo hotelRepo;
-    @Autowired
-    private RoomRepo roomRepo;
-    @Autowired
-    private PaymentServices paymentServices;
+
+    private final BookingRepo bookingRepo;
+    private final UserRepo userRepo;
+    private final HotelRepo hotelRepo;
+    private final RoomRepo roomRepo;
+    private final PaymentServices paymentServices;
+    private final RedisLockService redisLockService;
 
     @Transactional
     public Booking createBooking(BookingRequest request){
+        String lockKey=null;
+        boolean locked=false;
+        try {
 
-        User user = userRepo.findById(request.getId())
-                .orElseThrow(() -> new RuntimeException("User Not Found"));
+            User user = userRepo.findById(request.getId())
+                    .orElseThrow(() -> new RuntimeException("User Not Found"));
 
-        Hotel hotel = hotelRepo.findByName(request.getHotelName())
-                .orElseThrow(() -> new RuntimeException("Hotel Not Found"));
+            Hotel hotel = hotelRepo.findByName(request.getHotelName())
+                    .orElseThrow(() -> new RuntimeException("Hotel Not Found"));
 
-        List<Room> rooms =
-                roomRepo.findByHotelIdAndRoomType(
-                        hotel.getId(),
-                        request.getRoomType());
+             lockKey = "booking:hotel:" + hotel.getId() + ":" + request.getRoomType();
+           locked = redisLockService.acquireLock(lockKey);
 
-        if(rooms.isEmpty()){
-            throw new RuntimeException("No Room Found");
-        }
+            if (!locked) {
+                throw new RuntimeException(
+                        "Another booking request is already being processed. Please try again later."
+                );
+            }
 
-        Room selectedRoom = null;
+            List<Room> rooms =
+                    roomRepo.findByHotelIdAndRoomType(
+                            hotel.getId(),
+                            request.getRoomType());
 
-        for(Room room : rooms){
+            if (rooms.isEmpty()) {
+                throw new RuntimeException("No Room Found");
+            }
 
-            List<Booking> bookings =
-                    bookingRepo.findByRoomIdAndStatus(
-                            room.getId(),
-                            BookingStatus.PENDING);
+            Room selectedRoom = null;
 
-            boolean overlap = false;
+            for (Room room : rooms) {
 
-            for(Booking booking : bookings){
+                List<Booking> bookings =
+                        bookingRepo.findByRoomIdAndStatusIn(
+                                room.getId(),
+                                List.of(
+                                        BookingStatus.PENDING,
+                                        BookingStatus.CONFIRMED
+                                ));
 
-                if(request.getCheckInDate().isBefore(booking.getCheckOutDate())
-                        &&
-                        request.getCheckOutDate().isAfter(booking.getCheckInDate())){
+                boolean overlap = false;
 
-                    overlap = true;
+                for (Booking booking : bookings) {
+
+                    if (request.getCheckInDate().isBefore(booking.getCheckOutDate())
+                            &&
+                            request.getCheckOutDate().isAfter(booking.getCheckInDate())) {
+
+                        overlap = true;
+                        break;
+
+                    }
+
+                }
+
+                if (!overlap) {
+                    selectedRoom = room;
                     break;
-
                 }
 
             }
 
-            if(!overlap){
-                selectedRoom = room;
-                break;
+            if (selectedRoom == null) {
+                throw new RuntimeException("No Room Available For Selected Dates");
             }
 
+            long days = ChronoUnit.DAYS.between(
+                    request.getCheckInDate(),
+                    request.getCheckOutDate());
+
+            if (days <= 0) {
+                throw new RuntimeException("Invalid Dates");
+            }
+
+            BigDecimal totalPrice =
+                    selectedRoom.getPricePerNight()
+                            .multiply(BigDecimal.valueOf(days));
+
+            Booking booking = new Booking();
+
+            booking.setUser(user);
+            booking.setRoom(selectedRoom);
+            booking.setHotelName(hotel.getName());
+            booking.setCheckInDate(request.getCheckInDate());
+            booking.setCheckOutDate(request.getCheckOutDate());
+            booking.setStatus(BookingStatus.PENDING);
+            booking.setTotalPrice(totalPrice);
+            booking.setCreatedAt(LocalDateTime.now());
+
+            try {
+                Thread.sleep(10000); // 10 seconds
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return bookingRepo.save(booking);
         }
+        finally {
+            if(locked){
+                redisLockService.releaseLock(lockKey);
 
-        if(selectedRoom == null){
-            throw new RuntimeException("No Room Available For Selected Dates");
+            }
         }
-
-        long days = ChronoUnit.DAYS.between(
-                request.getCheckInDate(),
-                request.getCheckOutDate());
-
-        if(days <= 0){
-            throw new RuntimeException("Invalid Dates");
-        }
-
-        BigDecimal totalPrice =
-                selectedRoom.getPricePerNight()
-                        .multiply(BigDecimal.valueOf(days));
-
-        Booking booking = new Booking();
-
-        booking.setUser(user);
-        booking.setRoom(selectedRoom);
-        booking.setHotelName(hotel.getName());
-        booking.setCheckInDate(request.getCheckInDate());
-        booking.setCheckOutDate(request.getCheckOutDate());
-        booking.setStatus(BookingStatus.PENDING);
-        booking.setTotalPrice(totalPrice);
-        booking.setCreatedAt(LocalDateTime.now());
-
-
-
-        return bookingRepo.save(booking);
 
     }
+
+
+
    public Optional<Booking>  getBookingByBookingId(Long id){
 
         if(!bookingRepo.existsById(id)){
@@ -141,8 +164,7 @@ public class BookingServices {
                                  BookingRequest request){
 
         Booking booking = bookingRepo.findById(bookingId)
-                .orElseThrow(() ->
-                        new RuntimeException("Booking Not Found"));
+                .orElseThrow();
 
         if(booking.getStatus() == BookingStatus.CANCELLED){
             throw new RuntimeException("Cancelled Booking Cannot Be Updated");
@@ -157,7 +179,7 @@ public class BookingServices {
         List<Booking> bookings =
                 bookingRepo.findByRoomIdAndStatus(
                         room.getId(),
-                        BookingStatus.CONFIRMED);
+                       BookingStatus.CONFIRMED);
 
         for(Booking b : bookings){
 

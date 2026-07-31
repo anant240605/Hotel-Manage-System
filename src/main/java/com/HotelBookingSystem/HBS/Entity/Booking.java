@@ -1,16 +1,15 @@
 package com.HotelBookingSystem.HBS.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.micrometer.common.lang.NonNull;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
 
 @Entity
 @Table(name="bookings")
@@ -58,5 +57,7 @@ public class Booking {
     @OneToOne(mappedBy = "booking")
     @JsonIgnore
     private Payment payment;
+
+
 
 }

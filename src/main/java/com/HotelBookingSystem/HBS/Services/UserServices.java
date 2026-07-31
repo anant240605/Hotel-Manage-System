@@ -1,10 +1,8 @@
 package com.HotelBookingSystem.HBS.Services;
 
 import com.HotelBookingSystem.HBS.Entity.Role;
-import com.HotelBookingSystem.HBS.Entity.Room;
 import com.HotelBookingSystem.HBS.Entity.User;
 import com.HotelBookingSystem.HBS.Repository.UserRepo;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
@@ -69,16 +67,5 @@ public class UserServices {
         }
 
     }
-
-
-
-
-
-
-
-
-
-
-
 
 }
