@@ -1,68 +1,65 @@
 package com.HotelBookingSystem.HBS.Services;
-
 import com.HotelBookingSystem.HBS.Entity.Role;
 import com.HotelBookingSystem.HBS.Entity.User;
 import com.HotelBookingSystem.HBS.Repository.UserRepo;
-import org.springframework.beans.factory.annotation.Autowired;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-
 import java.util.List;
 import java.util.Objects;
 
 
 @Service
+@RequiredArgsConstructor
 public class UserServices {
-    @Autowired
-    private UserRepo userRepo;
 
-    public User registerUser(User user){
+    private final UserRepo userRepo;
 
-            if(!userRepo.existsByEmail(user.getEmail())){
-                if(Objects.isNull(user.getRole())) {
-                    user.setRole(Role.CUSTOMER);
-                }
+    public void registerUser(User user) {
 
-                return userRepo.save(user);
-            }else{
-                  throw new RuntimeException("Email Already Existed");
+        if (!userRepo.existsByEmail(user.getEmail())) {
+            if (Objects.isNull(user.getRole())) {
+                user.setRole(Role.CUSTOMER);
             }
+
+            userRepo.save(user);
+        } else {
+            throw new RuntimeException("Email Already Existed");
+        }
     }
 
-    public List<User> getAllUsers(){
+    public List<User> getAllUsers() {
         return userRepo.findAll();
 
     }
 
 
-    public boolean deleteUserByEmail( String email){
-         userRepo.deleteByEmail(email);
-         return true;
+    public void deleteUserByEmail(String email) {
+        userRepo.deleteByEmail(email);
+
     }
 
-    public User updateUsersByEmail(User user, String email){
-        if(userRepo.existsByEmail(email)){
+    public User updateUsersByEmail(User user, String email) {
+        if (userRepo.existsByEmail(email)) {
 
-            User olduser= userRepo.getUserByEmail(email);
-            if(!StringUtils.isEmpty(user.getEmail())){
+            User olduser = userRepo.getUserByEmail(email);
+            if (!StringUtils.isEmpty(user.getEmail())) {
                 olduser.setName(user.getName());
             }
 
 
-            if(user.getEmail()!=null && user.getEmail()!=""){
+            if (user.getEmail() != null && user.getEmail().isEmpty()) {
                 olduser.setEmail(user.getEmail());
             }
-            if(user.getPassword()!=null && !user.getPassword().equals("")){
+            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
                 olduser.setPassword(user.getPassword());
             }
-            if(user.getRole()!=null){
+            if (user.getRole() != null) {
                 olduser.setRole(user.getRole());
             }
             return olduser;
 
-        }else{
+        } else {
             return null;
         }
 

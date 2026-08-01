@@ -5,15 +5,16 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
+
 @Entity
- @Table(name="rooms")
+@Table(name = "rooms")
 @Data
 
 public class Room {
     @Id
     @Column(nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id ;
+    private Long id;
 
     @Column(nullable = false)
     private int roomNumber;
@@ -33,7 +34,6 @@ public class Room {
     @JoinColumn(name = "hotel_id")
     @JsonIgnore
     private Hotel hotel;
-
 
 
 }

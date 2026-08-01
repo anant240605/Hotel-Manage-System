@@ -33,6 +33,4 @@ public class Hotel {
     private List<Room> rooms;
 
 
-
-
 }

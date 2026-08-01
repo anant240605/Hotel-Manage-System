@@ -29,9 +29,9 @@ public class BookingServices {
     private final RedisLockService redisLockService;
 
     @Transactional
-    public Booking createBooking(BookingRequest request){
-        String lockKey=null;
-        boolean locked=false;
+    public Booking createBooking(BookingRequest request) {
+        String lockKey = null;
+        boolean locked = false;
         try {
 
             User user = userRepo.findById(request.getId())
@@ -40,8 +40,8 @@ public class BookingServices {
             Hotel hotel = hotelRepo.findByName(request.getHotelName())
                     .orElseThrow(() -> new RuntimeException("Hotel Not Found"));
 
-             lockKey = "booking:hotel:" + hotel.getId() + ":" + request.getRoomType();
-           locked = redisLockService.acquireLock(lockKey);
+            lockKey = "booking:hotel:" + hotel.getId() + ":" + request.getRoomType();
+            locked = redisLockService.acquireLock(lockKey);
 
             if (!locked) {
                 throw new RuntimeException(
@@ -125,9 +125,8 @@ public class BookingServices {
                 Thread.currentThread().interrupt();
             }
             return bookingRepo.save(booking);
-        }
-        finally {
-            if(locked){
+        } finally {
+            if (locked) {
                 redisLockService.releaseLock(lockKey);
 
             }
@@ -136,15 +135,14 @@ public class BookingServices {
     }
 
 
+    public Optional<Booking> getBookingByBookingId(Long id) {
 
-   public Optional<Booking>  getBookingByBookingId(Long id){
-
-        if(!bookingRepo.existsById(id)){
-             throw  new RuntimeException("Booking not found");
+        if (!bookingRepo.existsById(id)) {
+            throw new RuntimeException("Booking not found");
         }
-       Optional<Booking> booking=bookingRepo.findById(id);
-      return booking;
-   }
+        Optional<Booking> booking = bookingRepo.findById(id);
+        return booking;
+    }
 
     public List<Booking> getBookingsByUser(Long userId) {
 
@@ -156,21 +154,18 @@ public class BookingServices {
     }
 
 
-
-
-
     @Transactional
-    public Booking updateBooking(Long bookingId,
-                                 BookingRequest request){
+    public void updateBooking(Long bookingId,
+                                 BookingRequest request) {
 
         Booking booking = bookingRepo.findById(bookingId)
                 .orElseThrow();
 
-        if(booking.getStatus() == BookingStatus.CANCELLED){
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
             throw new RuntimeException("Cancelled Booking Cannot Be Updated");
         }
 
-        if(!request.getCheckOutDate().isAfter(request.getCheckInDate())){
+        if (!request.getCheckOutDate().isAfter(request.getCheckInDate())) {
             throw new RuntimeException("Check-out must be after Check-in");
         }
 
@@ -179,17 +174,17 @@ public class BookingServices {
         List<Booking> bookings =
                 bookingRepo.findByRoomIdAndStatus(
                         room.getId(),
-                       BookingStatus.CONFIRMED);
+                        BookingStatus.CONFIRMED);
 
-        for(Booking b : bookings){
+        for (Booking b : bookings) {
 
-            if(b.getId().equals(bookingId)){
+            if (b.getId().equals(bookingId)) {
                 continue;
             }
 
-            if(request.getCheckInDate().isBefore(b.getCheckOutDate())
+            if (request.getCheckInDate().isBefore(b.getCheckOutDate())
                     &&
-                    request.getCheckOutDate().isAfter(b.getCheckInDate())){
+                    request.getCheckOutDate().isAfter(b.getCheckInDate())) {
 
                 throw new RuntimeException(
                         "Room already booked for selected dates");
@@ -209,24 +204,20 @@ public class BookingServices {
         booking.setCheckOutDate(request.getCheckOutDate());
         booking.setTotalPrice(totalPrice);
 
-        return bookingRepo.save(booking);
-
     }
 
     @Transactional
-    public Booking cancelBooking(Long bookingId){
+    public void cancelBooking(Long bookingId) {
 
         Booking booking = bookingRepo.findById(bookingId)
                 .orElseThrow(() ->
                         new RuntimeException("Booking Not Found"));
 
-        if(booking.getStatus() == BookingStatus.CANCELLED){
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
             throw new RuntimeException("Booking Already Cancelled");
         }
 
         booking.setStatus(BookingStatus.CANCELLED);
-
-        return bookingRepo.save(booking);
 
     }
 

@@ -7,14 +7,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface RoomRepo extends JpaRepository<Room, Long > {
-   List<Room> findByHotelId(Long hotelId);
-   Room findByIdAndHotelId(Long roomId,Long hotelId);
-   Optional<Room> findFirstByHotelIdAndRoomTypeAndAvailable(
-           Long hotelId,
-           RoomType roomType,
-           String available
-   );
+public interface RoomRepo extends JpaRepository<Room, Long> {
+    List<Room> findByHotelId(Long hotelId);
 
-   List<Room> findByHotelIdAndRoomType(Long hotelId, RoomType roomType);
+    Room findByIdAndHotelId(Long roomId, Long hotelId);
+
+    Optional<Room> findFirstByHotelIdAndRoomTypeAndAvailable(
+            Long hotelId,
+            RoomType roomType,
+            String available
+    );
+
+    List<Room> findByHotelIdAndRoomType(Long hotelId, RoomType roomType);
 }

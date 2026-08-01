@@ -1,5 +1,4 @@
 package com.HotelBookingSystem.HBS.Scheduler;
-
 import com.HotelBookingSystem.HBS.Entity.Booking;
 import com.HotelBookingSystem.HBS.Entity.BookingStatus;
 import com.HotelBookingSystem.HBS.Entity.Payment;
@@ -20,7 +19,7 @@ public class BookingScheduler {
 
     @Scheduled(fixedRate = 60000)
     @Transactional
-    public void cancelExpiredBookings(){
+    public void cancelExpiredBookings() {
 
         List<Booking> bookings =
                 bookingRepository.findByStatusAndCreatedAtBefore(

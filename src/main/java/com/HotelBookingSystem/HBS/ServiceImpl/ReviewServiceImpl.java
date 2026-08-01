@@ -7,32 +7,20 @@ import com.HotelBookingSystem.HBS.Exception.ReviewException;
 import com.HotelBookingSystem.HBS.Repository.BookingRepo;
 import com.HotelBookingSystem.HBS.Repository.HotelRepo;
 import com.HotelBookingSystem.HBS.Repository.ReviewRepo;
-import com.HotelBookingSystem.HBS.Repository.UserRepo;
 import com.HotelBookingSystem.HBS.Services.ReviewService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepo reviewRepo;
     private final BookingRepo bookingRepo;
     private final HotelRepo hotelRepo;
-    private final UserRepo userRepo;
-
-    public ReviewServiceImpl(ReviewRepo reviewRepo,
-                             BookingRepo bookingRepo,
-                             HotelRepo hotelRepo,
-                             UserRepo userRepo) {
-
-        this.reviewRepo = reviewRepo;
-        this.bookingRepo = bookingRepo;
-        this.hotelRepo = hotelRepo;
-        this.userRepo = userRepo;
-    }
 
     @Override
     public ReviewResponse addReview(Long hotelId,
@@ -136,7 +124,6 @@ public class ReviewServiceImpl implements ReviewService {
 
         if (rating == null)
             return 0.0;
-
         return rating;
     }
 

@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="bookings")
+@Table(name = "bookings")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,7 +20,7 @@ public class Booking {
     @Id
     @NonNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id ;
+    private Long id;
 
     @Column(nullable = false)
     private LocalDate checkInDate;
@@ -39,14 +39,12 @@ public class Booking {
     @Column(nullable = false)
     private String hotelName;
 
-    @Column(nullable = false,name = "created_at")
-//    @CreationTimestamp
+    @Column(nullable = false, name = "created_at")
+
     private LocalDateTime createdAt;
 
-//    updatedAt
-
     @ManyToOne
-    @JoinColumn(name="user_id")
+    @JoinColumn(name = "user_id")
     @JsonIgnore
     private User user;
 
@@ -57,7 +55,6 @@ public class Booking {
     @OneToOne(mappedBy = "booking")
     @JsonIgnore
     private Payment payment;
-
 
 
 }

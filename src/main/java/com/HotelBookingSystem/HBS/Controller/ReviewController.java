@@ -1,11 +1,9 @@
 package com.HotelBookingSystem.HBS.Controller;
-
 import com.HotelBookingSystem.HBS.DTO.ReviewRequest;
 import com.HotelBookingSystem.HBS.DTO.ReviewResponse;
 import com.HotelBookingSystem.HBS.Services.ReviewService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController

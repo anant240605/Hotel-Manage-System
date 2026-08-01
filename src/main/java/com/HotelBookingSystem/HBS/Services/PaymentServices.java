@@ -1,5 +1,4 @@
 package com.HotelBookingSystem.HBS.Services;
-
 import com.HotelBookingSystem.HBS.DTO.PaymentRequest;
 import com.HotelBookingSystem.HBS.Entity.Booking;
 import com.HotelBookingSystem.HBS.Entity.BookingStatus;
@@ -8,35 +7,32 @@ import com.HotelBookingSystem.HBS.Entity.PaymentStatus;
 import com.HotelBookingSystem.HBS.Repository.BookingRepo;
 import com.HotelBookingSystem.HBS.Repository.PaymentRepo;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class PaymentServices {
-    @Autowired
-    private EmailService emailService;
-    @Autowired
-    private PaymentRepo paymentRepository;
-
-    @Autowired
-    private BookingRepo bookingRepository;
+    private final EmailService emailService;
+    private final PaymentRepo paymentRepository;
+    private final BookingRepo bookingRepository;
 
     @Transactional
-    public Payment makePayment(PaymentRequest request){
+    public void makePayment(PaymentRequest request) {
 
         Booking booking = bookingRepository.findById(request.getBookingId())
                 .orElseThrow(() ->
                         new RuntimeException("Booking Not Found"));
 
-        if(booking.getStatus()== BookingStatus.CONFIRMED){
+        if (booking.getStatus() == BookingStatus.CONFIRMED) {
             throw new RuntimeException("Booking Already Paid");
         }
 
-        if(booking.getStatus()== BookingStatus.CANCELLED){
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
             throw new RuntimeException("Booking Cancelled");
         }
 
-        if(paymentRepository.findByBookingId(request.getBookingId()).isPresent()){
+        if (paymentRepository.findByBookingId(request.getBookingId()).isPresent()) {
             throw new RuntimeException("Payment Already Exists");
         }
 
@@ -57,11 +53,9 @@ public class PaymentServices {
         bookingRepository.save(booking);
         emailService.sendBookingConfirmation(booking);
 
-        return payment;
-
     }
 
-    public Payment getPayment(Long paymentId){
+    public Payment getPayment(Long paymentId) {
 
         return paymentRepository.findById(paymentId)
                 .orElseThrow(() ->
@@ -69,7 +63,7 @@ public class PaymentServices {
 
     }
 
-    public Payment getPaymentByBooking(Long bookingId){
+    public Payment getPaymentByBooking(Long bookingId) {
 
         return paymentRepository.findByBookingId(bookingId)
                 .orElseThrow(() ->
@@ -78,13 +72,13 @@ public class PaymentServices {
     }
 
     @Transactional
-    public Payment refundPayment(Long bookingId){
+    public  void refundPayment(Long bookingId) {
 
         Payment payment = paymentRepository.findByBookingId(bookingId)
                 .orElseThrow(() ->
                         new RuntimeException("Payment Not Found"));
 
-        if(payment.getStatus()==PaymentStatus.REFUNDED){
+        if (payment.getStatus() == PaymentStatus.REFUNDED) {
             throw new RuntimeException("Payment Already Refunded");
         }
 
@@ -98,7 +92,6 @@ public class PaymentServices {
 
         bookingRepository.save(booking);
 
-        return payment;
 
     }
 

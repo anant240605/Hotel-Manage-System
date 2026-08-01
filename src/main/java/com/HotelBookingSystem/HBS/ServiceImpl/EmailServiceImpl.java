@@ -1,19 +1,17 @@
-package com.HotelBookingSystem.HBS.ServiceImpl.EmailServiceImpl;
-
+package com.HotelBookingSystem.HBS.ServiceImpl;
 import com.HotelBookingSystem.HBS.Entity.Booking;
 import com.HotelBookingSystem.HBS.Services.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
 
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
     private final JavaMailSender mailSender;
+
     @Async("emailExecutor")
     @Override
     public void sendBookingConfirmation(Booking booking) {

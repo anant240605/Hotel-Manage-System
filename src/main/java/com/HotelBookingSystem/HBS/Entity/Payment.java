@@ -6,7 +6,7 @@ import lombok.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name="Payments")
+@Table(name = "Payments")
 @Data
 @NoArgsConstructor
 public class Payment {
@@ -17,7 +17,7 @@ public class Payment {
 
     @Column(nullable = false)
     @NonNull
-    private BigDecimal amount ;
+    private BigDecimal amount;
 
     @NonNull
     @Enumerated(EnumType.STRING)
