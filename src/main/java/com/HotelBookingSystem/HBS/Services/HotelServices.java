@@ -77,9 +77,7 @@ public class HotelServices {
         if ((hotelRepo.findByName(hotel.getName()).isEmpty())) {
             throw new RuntimeException("Hotel not found");
         }
-        Optional<Hotel> existinghotel = hotelRepo.findById(id);
-        Hotel existingHotel = existinghotel.get();
-
+        Hotel existingHotel = hotelRepo.findById(id).orElseThrow(()->new RuntimeException("Hotel not found"));
 
         if ( !hotel.getName().isBlank()) {
             existingHotel.setName(hotel.getName());

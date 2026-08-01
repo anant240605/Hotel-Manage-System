@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @Table(name = "Payments")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Payment {
     @Id
     @NonNull

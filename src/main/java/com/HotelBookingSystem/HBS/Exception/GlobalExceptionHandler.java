@@ -18,5 +18,13 @@ public class GlobalExceptionHandler {
                 .body(e.getMessage());
 
     }
+    @ExceptionHandler(PaymentException.class)
+    public ResponseEntity<String> paymentException(PaymentException e) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(e.getMessage());
+
+    }
 
 }

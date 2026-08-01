@@ -4,6 +4,7 @@ import com.HotelBookingSystem.HBS.Entity.Booking;
 import com.HotelBookingSystem.HBS.Entity.BookingStatus;
 import com.HotelBookingSystem.HBS.Entity.Payment;
 import com.HotelBookingSystem.HBS.Entity.PaymentStatus;
+import com.HotelBookingSystem.HBS.Exception.PaymentException;
 import com.HotelBookingSystem.HBS.Repository.BookingRepo;
 import com.HotelBookingSystem.HBS.Repository.PaymentRepo;
 import jakarta.transaction.Transactional;
@@ -16,35 +17,47 @@ public class PaymentServices {
     private final EmailService emailService;
     private final PaymentRepo paymentRepository;
     private final BookingRepo bookingRepository;
+    private final PaymentGatewayFactory paymentGatewayFactory;
 
     @Transactional
     public void makePayment(PaymentRequest request) {
 
         Booking booking = bookingRepository.findById(request.getBookingId())
                 .orElseThrow(() ->
-                        new RuntimeException("Booking Not Found"));
+                        new PaymentException("Booking Not Found"));
 
         if (booking.getStatus() == BookingStatus.CONFIRMED) {
-            throw new RuntimeException("Booking Already Paid");
+            throw new PaymentException("Booking Already Paid");
         }
 
         if (booking.getStatus() == BookingStatus.CANCELLED) {
-            throw new RuntimeException("Booking Cancelled");
+            throw new PaymentException("Booking Cancelled");
         }
 
         if (paymentRepository.findByBookingId(request.getBookingId()).isPresent()) {
-            throw new RuntimeException("Payment Already Exists");
+            throw new PaymentException("Payment Already Exists");
         }
 
-        Payment payment = new Payment();
+//        Payment payment= new Payment();
+//
+//        payment.setAmount(booking.getTotalPrice());
+//
+//        payment.setPaymentMethod(request.getPaymentMethod());
+//
+//        payment.setStatus(PaymentStatus.SUCCESS);
+//
+//        payment.setBooking(booking);
 
-        payment.setAmount(booking.getTotalPrice());
+        PaymentGateway paymentGateway =
+                paymentGatewayFactory.getPaymentGateway(
+                        request.getPaymentMethod()
+                );
 
-        payment.setPaymentMethod(request.getPaymentMethod());
-
-        payment.setStatus(PaymentStatus.SUCCESS);
-
-        payment.setBooking(booking);
+        Payment payment =
+                paymentGateway.processPayment(
+                        booking,
+                        request
+                );
 
         booking.setStatus(BookingStatus.CONFIRMED);
 
@@ -59,7 +72,7 @@ public class PaymentServices {
 
         return paymentRepository.findById(paymentId)
                 .orElseThrow(() ->
-                        new RuntimeException("Payment Not Found"));
+                        new PaymentException("Payment Not Found"));
 
     }
 
@@ -67,7 +80,7 @@ public class PaymentServices {
 
         return paymentRepository.findByBookingId(bookingId)
                 .orElseThrow(() ->
-                        new RuntimeException("Payment Not Found"));
+                        new PaymentException("Payment Not Found"));
 
     }
 
@@ -76,10 +89,10 @@ public class PaymentServices {
 
         Payment payment = paymentRepository.findByBookingId(bookingId)
                 .orElseThrow(() ->
-                        new RuntimeException("Payment Not Found"));
+                        new PaymentException("Payment Not Found"));
 
         if (payment.getStatus() == PaymentStatus.REFUNDED) {
-            throw new RuntimeException("Payment Already Refunded");
+            throw new PaymentException("Payment Already Refunded");
         }
 
         Booking booking = payment.getBooking();
