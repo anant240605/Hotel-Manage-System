@@ -1,6 +1,8 @@
 package com.HotelBookingSystem.HBS.Services;
+import com.HotelBookingSystem.HBS.Constants.MessageConstants;
 import com.HotelBookingSystem.HBS.Entity.Role;
 import com.HotelBookingSystem.HBS.Entity.User;
+import com.HotelBookingSystem.HBS.Exception.UserException;
 import com.HotelBookingSystem.HBS.Repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +26,7 @@ public class UserServices {
 
             userRepo.save(user);
         } else {
-            throw new RuntimeException("Email Already Existed");
+            throw new UserException(MessageConstants.EMAIL_NOT_FOUND);
         }
     }
 

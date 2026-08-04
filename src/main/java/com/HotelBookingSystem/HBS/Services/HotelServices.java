@@ -1,8 +1,9 @@
 package com.HotelBookingSystem.HBS.Services;
-
+import com.HotelBookingSystem.HBS.Constants.MessageConstants;
 import com.HotelBookingSystem.HBS.DTO.HotelResponse;
 import com.HotelBookingSystem.HBS.DTO.RoomResponse;
 import com.HotelBookingSystem.HBS.Entity.Hotel;
+import com.HotelBookingSystem.HBS.Exception.HotelException;
 import com.HotelBookingSystem.HBS.Repository.HotelRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,7 +22,7 @@ public class HotelServices {
     @CacheEvict(value = "hotelByCity", allEntries = true)
     public void saveHotel(Hotel hotel) {
         if (hotelRepo.existsByName(hotel.getName()) && hotelRepo.existsByAddress(hotel.getAddress())) {
-            throw new RuntimeException("Hotel Already Existed");
+            throw new HotelException(MessageConstants.HOTEL_ALREADY_EXISTS);
         }
 
          hotelRepo.save(hotel);
@@ -36,6 +37,9 @@ public class HotelServices {
         System.out.println("Fetching from db ");
 
         List<Hotel> hotels = hotelRepo.getHotelByCity(city);
+        if(hotels.isEmpty()){
+             throw new HotelException(MessageConstants.NO_HOTELS_FOUND);
+        }
 
         return hotels.stream().map(hotel -> {
 
@@ -70,10 +74,7 @@ public class HotelServices {
 
     public void updateHotel(Long id, Hotel hotel) {
 
-        if ((hotelRepo.findByName(hotel.getName()).isEmpty())) {
-            throw new RuntimeException("Hotel not found");
-        }
-        Hotel existingHotel = hotelRepo.findById(id).orElseThrow(()->new RuntimeException("Hotel not found"));
+        Hotel existingHotel = hotelRepo.findById(id).orElseThrow(()->new RuntimeException(MessageConstants.HOTEL_NOT_FOUND));
 
         if ( !hotel.getName().isBlank()) {
             existingHotel.setName(hotel.getName());
@@ -101,7 +102,7 @@ public class HotelServices {
     public void deleteHotel(Long id) {
 
         if (!hotelRepo.existsById(id)) {
-            throw new RuntimeException("Hotel not found");
+            throw new HotelException(MessageConstants.HOTEL_NOT_FOUND);
 
         }
 

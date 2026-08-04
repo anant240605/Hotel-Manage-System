@@ -1,6 +1,8 @@
 package com.HotelBookingSystem.HBS.Services;
+import com.HotelBookingSystem.HBS.Constants.MessageConstants;
 import com.HotelBookingSystem.HBS.Entity.Hotel;
 import com.HotelBookingSystem.HBS.Entity.Room;
+import com.HotelBookingSystem.HBS.Exception.RoomException;
 import com.HotelBookingSystem.HBS.Repository.HotelRepo;
 import com.HotelBookingSystem.HBS.Repository.RoomRepo;
 import jakarta.transaction.Transactional;
@@ -18,7 +20,7 @@ public class RoomServices {
     public void createRoom(Long hotelId, Room room) {
 
         Hotel hotel = hotelRepo.findById(hotelId)
-                .orElseThrow(() -> new RuntimeException("Hotel Not Found"));
+                .orElseThrow(() -> new RoomException(MessageConstants.HOTEL_NOT_FOUND));
 
         room.setHotel(hotel);
 
@@ -28,7 +30,7 @@ public class RoomServices {
     public List<Room> getRooms(Long hotelId) {
 
         if (!hotelRepo.existsById(hotelId)) {
-            throw new RuntimeException("Hotel Not Found");
+            throw new RoomException(MessageConstants.HOTEL_NOT_FOUND);
         }
 
         return roomRepo.findByHotelId(hotelId);
@@ -38,7 +40,7 @@ public class RoomServices {
         try {
             Room existingRoom = roomRepo.findByIdAndHotelId(roomId, hotelId);
             if (existingRoom == null) {
-                throw new RuntimeException("Room not found");
+                throw new RoomException(MessageConstants.ROOM_NOT_FOUND);
             }
 
 
@@ -58,7 +60,7 @@ public class RoomServices {
             roomRepo.save(existingRoom);
 
         } catch (Exception e) {
-            throw new RuntimeException("Something went wrong");
+            throw new RoomException(MessageConstants.SOMETHING_WENT_WRONG);
         }
 
     }
@@ -72,7 +74,7 @@ public class RoomServices {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Something went wrong");
+            throw new RoomException(MessageConstants.SOMETHING_WENT_WRONG);
 
         }
 

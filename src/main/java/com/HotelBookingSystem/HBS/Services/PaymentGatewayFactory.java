@@ -1,4 +1,5 @@
 package com.HotelBookingSystem.HBS.Services;
+import com.HotelBookingSystem.HBS.Constants.MessageConstants;
 import com.HotelBookingSystem.HBS.Entity.PaymentMethod;
 import com.HotelBookingSystem.HBS.ServiceImpl.CardPaymentGateway;
 import com.HotelBookingSystem.HBS.ServiceImpl.NetBankingPaymentGateway;
@@ -20,7 +21,7 @@ public class PaymentGatewayFactory {
             case UPI -> upiPaymentGateway;
             case CARD -> cardPaymentGateway;
             case NET_BANKING -> netBankingPaymentGateway;
-            default -> throw new RuntimeException("Invalid Payment Method");
+            default -> throw new RuntimeException(MessageConstants.INVALID_PAYMENT_METHOD);
         };
 
     }

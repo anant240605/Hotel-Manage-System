@@ -1,4 +1,5 @@
 package com.HotelBookingSystem.HBS.Services;
+import com.HotelBookingSystem.HBS.Constants.MessageConstants;
 import com.HotelBookingSystem.HBS.DTO.PaymentRequest;
 import com.HotelBookingSystem.HBS.Entity.Booking;
 import com.HotelBookingSystem.HBS.Entity.BookingStatus;
@@ -24,18 +25,18 @@ public class PaymentServices {
 
         Booking booking = bookingRepository.findById(request.getBookingId())
                 .orElseThrow(() ->
-                        new PaymentException("Booking Not Found"));
+                        new PaymentException(MessageConstants.BOOKING_NOT_FOUND));
 
         if (booking.getStatus() == BookingStatus.CONFIRMED) {
-            throw new PaymentException("Booking Already Paid");
+            throw new PaymentException(MessageConstants.BOOKING_ALREADY_PAID);
         }
 
         if (booking.getStatus() == BookingStatus.CANCELLED) {
-            throw new PaymentException("Booking Cancelled");
+            throw new PaymentException(MessageConstants.BOOKING_CANCELLED);
         }
 
         if (paymentRepository.findByBookingId(request.getBookingId()).isPresent()) {
-            throw new PaymentException("Payment Already Exists");
+            throw new PaymentException(MessageConstants.PAYMENT_ALREADY_EXISTS);
         }
 
         PaymentGateway paymentGateway =
@@ -63,7 +64,7 @@ public class PaymentServices {
 
         return paymentRepository.findByBookingId(bookingId)
                 .orElseThrow(() ->
-                        new PaymentException("Payment Not Found"));
+                        new PaymentException(MessageConstants.PAYMENT_NOT_FOUND));
 
     }
 
@@ -72,10 +73,10 @@ public class PaymentServices {
 
         Payment payment = paymentRepository.findByBookingId(bookingId)
                 .orElseThrow(() ->
-                        new PaymentException("Payment Not Found"));
+                        new PaymentException(MessageConstants.PAYMENT_NOT_FOUND));
 
         if (payment.getStatus() == PaymentStatus.REFUNDED) {
-            throw new PaymentException("Payment Already Refunded");
+            throw new PaymentException(MessageConstants.PAYMENT_ALREADY_REFUNDED);
         }
 
         Booking booking = payment.getBooking();

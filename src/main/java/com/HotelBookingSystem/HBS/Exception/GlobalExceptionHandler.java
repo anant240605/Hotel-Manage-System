@@ -10,16 +10,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ReviewException.class)
-    public ResponseEntity<String> reviewException(ReviewException e) {
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(e.getMessage());
-
-    }
-    @ExceptionHandler(PaymentException.class)
-    public ResponseEntity<String> paymentException(PaymentException e) {
+    @ExceptionHandler({
+            ReviewException.class,
+            PaymentException.class,
+            BookingException.class,
+            HotelException.class,
+            RoomException.class,
+            UserException.class
+    })
+    public ResponseEntity<String> handleBusinessExceptions(RuntimeException e) {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)

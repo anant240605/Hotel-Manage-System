@@ -1,7 +1,9 @@
 package com.HotelBookingSystem.HBS.Controller;
 
+import com.HotelBookingSystem.HBS.Constants.MessageConstants;
 import com.HotelBookingSystem.HBS.Entity.Hotel;
 import com.HotelBookingSystem.HBS.Entity.Room;
+import com.HotelBookingSystem.HBS.Exception.ReviewException;
 import com.HotelBookingSystem.HBS.Repository.HotelRepo;
 import com.HotelBookingSystem.HBS.Services.RoomServices;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,7 @@ public class RoomController {
                                         @RequestBody Room room) {
 
         roomServices.createRoom(hotelId, room);
-        Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(()->new RuntimeException("Hotel not found"));
+        Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(()->new ReviewException(MessageConstants.HOTEL_NOT_FOUND));
 
         String name = hotel.getName();
         return new ResponseEntity<>("Room Created for " + name, HttpStatus.OK);
@@ -53,7 +55,7 @@ public class RoomController {
             roomServices.deleteRoom(hotelId, roomId);
 
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new ReviewException(e.getMessage());
         }
 
 

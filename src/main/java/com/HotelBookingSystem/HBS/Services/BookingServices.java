@@ -1,7 +1,8 @@
 package com.HotelBookingSystem.HBS.Services;
-
+import com.HotelBookingSystem.HBS.Constants.MessageConstants;
 import com.HotelBookingSystem.HBS.DTO.BookingRequest;
 import com.HotelBookingSystem.HBS.Entity.*;
+import com.HotelBookingSystem.HBS.Exception.BookingException;
 import com.HotelBookingSystem.HBS.Repository.BookingRepo;
 import com.HotelBookingSystem.HBS.Repository.HotelRepo;
 import com.HotelBookingSystem.HBS.Repository.RoomRepo;
@@ -9,7 +10,6 @@ import com.HotelBookingSystem.HBS.Repository.UserRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -33,17 +33,17 @@ public class BookingServices {
         try {
 
             User user = userRepo.findById(request.getId())
-                    .orElseThrow(() -> new RuntimeException("User Not Found"));
+                    .orElseThrow(() -> new BookingException(MessageConstants.USER_NOT_FOUND));
 
             Hotel hotel = hotelRepo.findByName(request.getHotelName())
-                    .orElseThrow(() -> new RuntimeException("Hotel Not Found"));
+                    .orElseThrow(() -> new BookingException(MessageConstants.HOTEL_NOT_FOUND));
 
             lockKey = "booking:hotel:" + hotel.getId() + ":" + request.getRoomType();
             locked = redisLockService.acquireLock(lockKey);
 
             if (!locked) {
-                throw new RuntimeException(
-                        "Another booking request is already being processed. Please try again later."
+                throw new BookingException(
+                        MessageConstants.BOOKING_IN_PROGRESS
                 );
             }
 
@@ -53,7 +53,7 @@ public class BookingServices {
                             request.getRoomType());
 
             if (rooms.isEmpty()) {
-                throw new RuntimeException("No Room Found");
+                throw new BookingException(MessageConstants.ROOM_NOT_FOUND);
             }
 
             Room selectedRoom = null;
@@ -91,7 +91,7 @@ public class BookingServices {
             }
 
             if (selectedRoom == null) {
-                throw new RuntimeException("No Room Available For Selected Dates");
+                throw new BookingException(MessageConstants.ROOM_NOT_AVAILABLE);
             }
 
             long days = ChronoUnit.DAYS.between(
@@ -99,7 +99,7 @@ public class BookingServices {
                     request.getCheckOutDate());
 
             if (days <= 0) {
-                throw new RuntimeException("Invalid Dates");
+                throw new BookingException(MessageConstants.INVALID_DATES);
             }
 
             BigDecimal totalPrice =
@@ -136,7 +136,7 @@ public class BookingServices {
     public Optional<Booking> getBookingByBookingId(Long id) {
 
         if (!bookingRepo.existsById(id)) {
-            throw new RuntimeException("Booking not found");
+            throw new BookingException(MessageConstants.BOOKING_NOT_FOUND);
         }
         return bookingRepo.findById(id);
     }
@@ -144,7 +144,7 @@ public class BookingServices {
     public List<Booking> getBookingsByUser(Long userId) {
 
         if (!userRepo.existsById(userId)) {
-            throw new RuntimeException("User Not Found");
+            throw new BookingException(MessageConstants.USER_NOT_FOUND);
         }
 
         return bookingRepo.findByUserId(userId);
@@ -159,11 +159,11 @@ public class BookingServices {
                 .orElseThrow();
 
         if (booking.getStatus() == BookingStatus.CANCELLED) {
-            throw new RuntimeException("Cancelled Booking Cannot Be Updated");
+            throw new BookingException(MessageConstants.CANCELLED_BOOKING_UPDATE);
         }
 
         if (!request.getCheckOutDate().isAfter(request.getCheckInDate())) {
-            throw new RuntimeException("Check-out must be after Check-in");
+            throw new BookingException(MessageConstants.INVALID_CHECKOUT);
         }
 
         Room room = booking.getRoom();
@@ -183,8 +183,8 @@ public class BookingServices {
                     &&
                     request.getCheckOutDate().isAfter(b.getCheckInDate())) {
 
-                throw new RuntimeException(
-                        "Room already booked for selected dates");
+                throw new BookingException(
+                        MessageConstants.ROOM_ALREADY_BOOKED);
             }
 
         }
@@ -208,10 +208,10 @@ public class BookingServices {
 
         Booking booking = bookingRepo.findById(bookingId)
                 .orElseThrow(() ->
-                        new RuntimeException("Booking Not Found"));
+                        new BookingException(MessageConstants.BOOKING_NOT_FOUND));
 
         if (booking.getStatus() == BookingStatus.CANCELLED) {
-            throw new RuntimeException("Booking Already Cancelled");
+            throw new BookingException(MessageConstants.BOOKING_ALREADY_CANCELLED);
         }
 
         booking.setStatus(BookingStatus.CANCELLED);
