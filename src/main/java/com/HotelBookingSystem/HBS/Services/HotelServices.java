@@ -3,23 +3,19 @@ package com.HotelBookingSystem.HBS.Services;
 import com.HotelBookingSystem.HBS.DTO.HotelResponse;
 import com.HotelBookingSystem.HBS.DTO.RoomResponse;
 import com.HotelBookingSystem.HBS.Entity.Hotel;
-import com.HotelBookingSystem.HBS.Entity.PaymentStatus;
 import com.HotelBookingSystem.HBS.Repository.HotelRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class HotelServices {
     private final HotelRepo hotelRepo;
-    private final PaymentServices paymentServices;
 
 
     @CacheEvict(value = "hotelByCity", allEntries = true)

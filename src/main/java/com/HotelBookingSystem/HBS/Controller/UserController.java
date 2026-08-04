@@ -4,7 +4,6 @@ import com.HotelBookingSystem.HBS.Entity.User;
 import com.HotelBookingSystem.HBS.Repository.UserRepo;
 import com.HotelBookingSystem.HBS.Services.UserServices;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +39,7 @@ public class UserController {
 
     @Transactional
     @DeleteMapping("delete/{email}")
-    public ResponseEntity<?> deleteUseresByEmail(@PathVariable String email) {
+    public ResponseEntity<?> deleteUsersByEmail(@PathVariable String email) {
         if (!userRepo.existsByEmail(email)) {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
         }

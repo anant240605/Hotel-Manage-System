@@ -11,11 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCaching
 @EnableAsync
 public class HbsApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(HbsApplication.class, args);
     }
-
 }
-
-

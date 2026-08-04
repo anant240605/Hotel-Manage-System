@@ -8,7 +8,6 @@ import com.HotelBookingSystem.HBS.Repository.RoomRepo;
 import com.HotelBookingSystem.HBS.Repository.UserRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,7 +24,6 @@ public class BookingServices {
     private final UserRepo userRepo;
     private final HotelRepo hotelRepo;
     private final RoomRepo roomRepo;
-    private final PaymentServices paymentServices;
     private final RedisLockService redisLockService;
 
     @Transactional
@@ -140,8 +138,7 @@ public class BookingServices {
         if (!bookingRepo.existsById(id)) {
             throw new RuntimeException("Booking not found");
         }
-        Optional<Booking> booking = bookingRepo.findById(id);
-        return booking;
+        return bookingRepo.findById(id);
     }
 
     public List<Booking> getBookingsByUser(Long userId) {

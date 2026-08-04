@@ -5,13 +5,9 @@ import com.HotelBookingSystem.HBS.Entity.Room;
 import com.HotelBookingSystem.HBS.Repository.HotelRepo;
 import com.HotelBookingSystem.HBS.Services.RoomServices;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("room")

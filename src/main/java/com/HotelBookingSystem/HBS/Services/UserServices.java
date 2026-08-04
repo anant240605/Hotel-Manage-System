@@ -43,7 +43,7 @@ public class UserServices {
         if (userRepo.existsByEmail(email)) {
 
             User olduser = userRepo.getUserByEmail(email);
-            if (!StringUtils.isEmpty(user.getEmail())) {
+            if (!StringUtils.hasText(user.getEmail())) {
                 olduser.setName(user.getName());
             }
 

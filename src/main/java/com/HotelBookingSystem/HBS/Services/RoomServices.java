@@ -1,17 +1,11 @@
 package com.HotelBookingSystem.HBS.Services;
-
-import ch.qos.logback.core.pattern.util.RegularEscapeUtil;
 import com.HotelBookingSystem.HBS.Entity.Hotel;
 import com.HotelBookingSystem.HBS.Entity.Room;
 import com.HotelBookingSystem.HBS.Repository.HotelRepo;
 import com.HotelBookingSystem.HBS.Repository.RoomRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Objects;
 

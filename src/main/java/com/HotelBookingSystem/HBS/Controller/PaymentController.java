@@ -1,6 +1,5 @@
 package com.HotelBookingSystem.HBS.Controller;
 import com.HotelBookingSystem.HBS.DTO.PaymentRequest;
-import com.HotelBookingSystem.HBS.Repository.PaymentRepo;
 import com.HotelBookingSystem.HBS.Services.PaymentServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,9 +12,6 @@ import org.springframework.web.bind.annotation.*;
 public class PaymentController {
 
     private  final PaymentServices paymentServices;
-
-    private final PaymentRepo paymentRepo;
-
     @PostMapping
     public ResponseEntity<?> makePayment(
             @RequestBody PaymentRequest request) {

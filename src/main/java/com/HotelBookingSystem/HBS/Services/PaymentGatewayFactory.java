@@ -1,5 +1,4 @@
 package com.HotelBookingSystem.HBS.Services;
-
 import com.HotelBookingSystem.HBS.Entity.PaymentMethod;
 import com.HotelBookingSystem.HBS.ServiceImpl.CardPaymentGateway;
 import com.HotelBookingSystem.HBS.ServiceImpl.NetBankingPaymentGateway;

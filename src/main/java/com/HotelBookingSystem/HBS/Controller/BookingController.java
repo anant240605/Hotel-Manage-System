@@ -1,15 +1,11 @@
 package com.HotelBookingSystem.HBS.Controller;
-
 import com.HotelBookingSystem.HBS.DTO.BookingRequest;
 import com.HotelBookingSystem.HBS.Entity.Booking;
 import com.HotelBookingSystem.HBS.Services.BookingServices;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 import java.util.Map;
 
 @RestController
@@ -45,8 +41,9 @@ public class BookingController {
     @GetMapping("{id}")
     public ResponseEntity<?> getBookingStatus(@PathVariable Long id) {
         try {
-            Optional<Booking> booking = bookingServices.getBookingByBookingId(id);
-            return new ResponseEntity<>(booking.get().getStatus(), HttpStatus.OK);
+            Booking booking = bookingServices.getBookingByBookingId(id).orElseThrow(()->new RuntimeException("Booking not found"));
+
+            return ResponseEntity.ok(booking.getStatus());
 
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);

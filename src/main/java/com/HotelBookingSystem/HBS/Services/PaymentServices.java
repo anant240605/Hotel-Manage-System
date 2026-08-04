@@ -38,16 +38,6 @@ public class PaymentServices {
             throw new PaymentException("Payment Already Exists");
         }
 
-//        Payment payment= new Payment();
-//
-//        payment.setAmount(booking.getTotalPrice());
-//
-//        payment.setPaymentMethod(request.getPaymentMethod());
-//
-//        payment.setStatus(PaymentStatus.SUCCESS);
-//
-//        payment.setBooking(booking);
-
         PaymentGateway paymentGateway =
                 paymentGatewayFactory.getPaymentGateway(
                         request.getPaymentMethod()
@@ -68,13 +58,6 @@ public class PaymentServices {
 
     }
 
-    public Payment getPayment(Long paymentId) {
-
-        return paymentRepository.findById(paymentId)
-                .orElseThrow(() ->
-                        new PaymentException("Payment Not Found"));
-
-    }
 
     public Payment getPaymentByBooking(Long bookingId) {
 
