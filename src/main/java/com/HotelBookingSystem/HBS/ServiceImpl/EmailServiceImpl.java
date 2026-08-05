@@ -1,4 +1,5 @@
 package com.HotelBookingSystem.HBS.ServiceImpl;
+import com.HotelBookingSystem.HBS.Constants.MessageConstants;
 import com.HotelBookingSystem.HBS.Entity.Booking;
 import com.HotelBookingSystem.HBS.Services.EmailService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
+
     private final JavaMailSender mailSender;
 
     @Async("emailExecutor")
@@ -48,7 +50,7 @@ public class EmailServiceImpl implements EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
 
 
-        message.setFrom("anant8139@gmail.com");
+        message.setFrom(MessageConstants.SENT_FROM);
 
         message.setTo(to);
         message.setSubject(subject);

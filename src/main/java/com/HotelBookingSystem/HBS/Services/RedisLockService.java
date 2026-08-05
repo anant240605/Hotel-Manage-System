@@ -1,5 +1,6 @@
 package com.HotelBookingSystem.HBS.Services;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import java.time.Duration;
@@ -7,6 +8,7 @@ import java.time.Duration;
 @Service
 @RequiredArgsConstructor
 public class RedisLockService {
+    @Qualifier("redisTemplate")
 
     private final RedisTemplate<String, Object> redisTemplate;
 

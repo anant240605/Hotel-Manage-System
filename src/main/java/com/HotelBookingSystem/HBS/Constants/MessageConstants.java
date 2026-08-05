@@ -53,4 +53,7 @@ public final class MessageConstants {
             "Email not found";
     public static final String INVALID_PAYMENT_METHOD =
             "Invalid Payment Method";
+    public static final String SENT_FROM =
+            "anant8139@gmail.com";
+
 }

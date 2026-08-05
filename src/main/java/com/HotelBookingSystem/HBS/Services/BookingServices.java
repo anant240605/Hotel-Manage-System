@@ -215,7 +215,6 @@ public class BookingServices {
         }
 
         booking.setStatus(BookingStatus.CANCELLED);
-
     }
 
 }

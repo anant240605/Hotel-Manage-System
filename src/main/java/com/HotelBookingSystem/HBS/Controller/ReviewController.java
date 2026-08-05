@@ -2,20 +2,17 @@ package com.HotelBookingSystem.HBS.Controller;
 import com.HotelBookingSystem.HBS.DTO.ReviewRequest;
 import com.HotelBookingSystem.HBS.DTO.ReviewResponse;
 import com.HotelBookingSystem.HBS.Services.ReviewService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
 @RequestMapping("/reviews")
+@RequiredArgsConstructor
 public class ReviewController {
 
     private final ReviewService reviewService;
-
-    public ReviewController(ReviewService reviewService) {
-        this.reviewService = reviewService;
-    }
-
     @PostMapping("/hotel/{hotelId}")
     public ResponseEntity<ReviewResponse> addReview(
             @PathVariable Long hotelId,

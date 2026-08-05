@@ -5,8 +5,7 @@ import com.HotelBookingSystem.HBS.Entity.Payment;
 import com.HotelBookingSystem.HBS.Entity.PaymentStatus;
 import com.HotelBookingSystem.HBS.Services.PaymentGateway;
 
-public abstract class AbstractPaymentGateway
-        implements PaymentGateway {
+public abstract class AbstractPaymentGateway implements PaymentGateway {
 
     @Override
     public Payment processPayment(
