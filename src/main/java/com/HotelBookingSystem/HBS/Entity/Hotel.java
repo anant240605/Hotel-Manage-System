@@ -30,7 +30,14 @@ public class Hotel {
     private Double rating;
 
     @OneToMany(mappedBy = "hotel")
+
     private List<Room> rooms;
+    @OneToMany(
+            mappedBy = "hotel",
+            cascade = CascadeType.ALL
+    )
+
+    private List<RoomCategory> roomCategories;
 
 
 }

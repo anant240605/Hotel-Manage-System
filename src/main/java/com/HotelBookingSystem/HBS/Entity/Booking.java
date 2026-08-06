@@ -35,9 +35,10 @@ public class Booking {
 
     @Column(nullable = false)
     private BigDecimal totalPrice;
+    public String getHotelName(){
+        return room.getHotel().getName();
 
-    @Column(nullable = false)
-    private String hotelName;
+    }
 
     @Column(nullable = false, name = "created_at")
 

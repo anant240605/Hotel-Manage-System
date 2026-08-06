@@ -1,9 +1,14 @@
 package com.HotelBookingSystem.HBS.Services;
 import com.HotelBookingSystem.HBS.Constants.MessageConstants;
+import com.HotelBookingSystem.HBS.DTO.CreateRoomRequest;
+import com.HotelBookingSystem.HBS.DTO.RoomResponse;
+import com.HotelBookingSystem.HBS.DTO.UpdateRoomRequest;
 import com.HotelBookingSystem.HBS.Entity.Hotel;
 import com.HotelBookingSystem.HBS.Entity.Room;
+import com.HotelBookingSystem.HBS.Entity.RoomCategory;
 import com.HotelBookingSystem.HBS.Exception.RoomException;
 import com.HotelBookingSystem.HBS.Repository.HotelRepo;
+import com.HotelBookingSystem.HBS.Repository.RoomCategoryRepository;
 import com.HotelBookingSystem.HBS.Repository.RoomRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,52 +21,72 @@ import java.util.Objects;
 public class RoomServices {
     private final RoomRepo roomRepo;
     private final HotelRepo hotelRepo;
+    private final RoomCategoryRepository roomCategoryRepository;
 
-    public void createRoom(Long hotelId, Room room) {
+    public void createRoom(Long hotelId, CreateRoomRequest request) {
 
-        Hotel hotel = hotelRepo.findById(hotelId)
-                .orElseThrow(() -> new RoomException(MessageConstants.HOTEL_NOT_FOUND));
-
-        room.setHotel(hotel);
+        Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(() -> new RoomException(MessageConstants.HOTEL_NOT_FOUND));
+        RoomCategory category= roomCategoryRepository.findById(request.getCategoryId()).orElseThrow(()->new RoomException("Category not found"));
+        if(!category.getHotel().getId().equals(hotelId)){
+            throw new RoomException("Category does not belong to this hotel");
+        }
+        Room room =
+                Room.builder()
+                        .roomNumber(request.getRoomNumber())
+                        .hotel(hotel)
+                        .roomCategory(category)
+                        .build();
 
          roomRepo.save(room);
     }
 
-    public List<Room> getRooms(Long hotelId) {
+    public List<RoomResponse> getRooms(Long hotelId) {
 
         if (!hotelRepo.existsById(hotelId)) {
             throw new RoomException(MessageConstants.HOTEL_NOT_FOUND);
         }
+        List<Room> rooms = roomRepo.findByHotelId(hotelId);
 
-        return roomRepo.findByHotelId(hotelId);
+        return rooms.stream()
+                .map(room ->
+                        RoomResponse.builder()
+
+                                .id(room.getId())
+                                .roomNumber(room.getRoomNumber())
+                                .roomType(room.getRoomCategory().getRoomType())
+                                .pricePerNight(room.getRoomCategory().getPricePerNight())
+                                .capacity(room.getRoomCategory().getCapacity())
+                                .build()
+                )
+
+                .toList();
     }
 
-    public void updateRoom(Long hotelId, Long roomId, Room room) {
-        try {
+    public void updateRoom(Long hotelId, Long roomId, UpdateRoomRequest room) {
+
             Room existingRoom = roomRepo.findByIdAndHotelId(roomId, hotelId);
             if (existingRoom == null) {
                 throw new RoomException(MessageConstants.ROOM_NOT_FOUND);
             }
 
 
-            if (room.getRoomNumber() != 0) {
+            if (room.getRoomNumber() != null) {
                 existingRoom.setRoomNumber(room.getRoomNumber());
             }
 
-            if (room.getCapacity() != 0) {
-                existingRoom.setCapacity(room.getCapacity());
+
+            if(room.getCategoryId()!=null){
+                RoomCategory category = roomCategoryRepository.findById(room.getCategoryId()).orElseThrow(()->new RoomException("Category Not Found"));
+
+                if(!category.getHotel().getId().equals(hotelId)){
+                    throw new RoomException("Category belongs to another hotel");
+                }
+                existingRoom.setRoomCategory(category);
             }
-
-
-            existingRoom.setPricePerNight(room.getPricePerNight());
-            existingRoom.setAvailable(room.getAvailable());
-            existingRoom.setRoomType(room.getRoomType());
 
             roomRepo.save(existingRoom);
 
-        } catch (Exception e) {
-            throw new RoomException(MessageConstants.SOMETHING_WENT_WRONG);
-        }
+
 
     }
 

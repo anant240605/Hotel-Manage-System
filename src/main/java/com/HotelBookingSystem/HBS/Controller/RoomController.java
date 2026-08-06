@@ -1,6 +1,8 @@
 package com.HotelBookingSystem.HBS.Controller;
 
 import com.HotelBookingSystem.HBS.Constants.MessageConstants;
+import com.HotelBookingSystem.HBS.DTO.CreateRoomRequest;
+import com.HotelBookingSystem.HBS.DTO.UpdateRoomRequest;
 import com.HotelBookingSystem.HBS.Entity.Hotel;
 import com.HotelBookingSystem.HBS.Entity.Room;
 import com.HotelBookingSystem.HBS.Exception.ReviewException;
@@ -21,7 +23,7 @@ public class RoomController {
 
     @PostMapping("/hotels/{hotelId}")
     public ResponseEntity<?> createRoom(@PathVariable Long hotelId,
-                                        @RequestBody Room room) {
+                                        @RequestBody CreateRoomRequest room) {
 
         roomServices.createRoom(hotelId, room);
         Hotel hotel = hotelRepo.findById(hotelId).orElseThrow(()->new ReviewException(MessageConstants.HOTEL_NOT_FOUND));
@@ -41,7 +43,7 @@ public class RoomController {
     @PutMapping("/{hotelId}/{roomId}")
     public ResponseEntity<?> updateRoom(@PathVariable Long hotelId,
                                         @PathVariable Long roomId,
-                                        @RequestBody Room room) {
+                                        @RequestBody UpdateRoomRequest room) {
         roomServices.updateRoom(hotelId, roomId, room);
         return new ResponseEntity<>("Room Updated ", HttpStatus.OK);
 

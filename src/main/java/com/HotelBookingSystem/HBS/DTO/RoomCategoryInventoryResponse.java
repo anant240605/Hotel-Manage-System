@@ -9,16 +9,15 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
-public class RoomResponse {
-
-    private Long id;
-    private Integer roomNumber;
+@NoArgsConstructor
+@AllArgsConstructor
+public class RoomCategoryInventoryResponse {
+    private Long categoryId;
+    private String categoryName;
+    private RoomType roomType;
     private BigDecimal pricePerNight;
     private Integer capacity;
-    private RoomType roomType;
-
+    private Long totalRooms;
 
 }

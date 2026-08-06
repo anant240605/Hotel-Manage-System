@@ -30,7 +30,6 @@ public class BookingController {
 
             return ResponseEntity.ok(bookingServices.getBookingsByUser(userId));
 
-
     }
 
     @GetMapping("{id}")

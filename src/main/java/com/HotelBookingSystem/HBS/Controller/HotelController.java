@@ -45,7 +45,6 @@ public class HotelController {
             return ResponseEntity.ok("Hotel Updated Successfully");
 
 
-
     }
 
     @DeleteMapping("/{id}")

@@ -10,11 +10,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class BookingRequest {
 
-    private Long id;
+    private Long userId;
 
-    private String hotelName;
+    private Long hotelId;
 
-    private RoomType roomType;
+    private Long roomCategoryId;
 
     private LocalDate checkInDate;
 

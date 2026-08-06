@@ -26,9 +26,9 @@ public class EmailServiceImpl implements EmailService {
                         "Your booking has been confirmed.\n\n" +
 
                         "Booking ID : " + booking.getId() + "\n" +
-                        "Hotel : " + booking.getHotelName() + "\n" +
+                        "Hotel : " + booking.getRoom().getHotel().getName() + "\n" +
                         "Room Number : " + booking.getRoom().getRoomNumber() + "\n" +
-                        "Room Type : " + booking.getRoom().getRoomType() + "\n" +
+                        "Room Type : " + booking.getRoom().getRoomCategory().getRoomType() + "\n" +
                         "Check In : " + booking.getCheckInDate() + "\n" +
                         "Check Out : " + booking.getCheckOutDate() + "\n" +
                         "Total Price : ₹" + booking.getTotalPrice() + "\n\n" +

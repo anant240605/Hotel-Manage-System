@@ -3,14 +3,12 @@ import com.HotelBookingSystem.HBS.Constants.MessageConstants;
 import com.HotelBookingSystem.HBS.DTO.BookingRequest;
 import com.HotelBookingSystem.HBS.Entity.*;
 import com.HotelBookingSystem.HBS.Exception.BookingException;
-import com.HotelBookingSystem.HBS.Repository.BookingRepo;
-import com.HotelBookingSystem.HBS.Repository.HotelRepo;
-import com.HotelBookingSystem.HBS.Repository.RoomRepo;
-import com.HotelBookingSystem.HBS.Repository.UserRepo;
+import com.HotelBookingSystem.HBS.Repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -25,6 +23,7 @@ public class BookingServices {
     private final HotelRepo hotelRepo;
     private final RoomRepo roomRepo;
     private final RedisLockService redisLockService;
+    private  final RoomCategoryRepository roomCategoryRepository;
 
     @Transactional
     public Booking createBooking(BookingRequest request) {
@@ -32,14 +31,20 @@ public class BookingServices {
         boolean locked = false;
         try {
 
-            User user = userRepo.findById(request.getId())
+            User user = userRepo.findById(request.getUserId())
                     .orElseThrow(() -> new BookingException(MessageConstants.USER_NOT_FOUND));
 
-            Hotel hotel = hotelRepo.findByName(request.getHotelName())
+            Hotel hotel = hotelRepo.findById(request.getHotelId())
                     .orElseThrow(() -> new BookingException(MessageConstants.HOTEL_NOT_FOUND));
+            RoomCategory category = roomCategoryRepository.findById(request.getRoomCategoryId()).orElseThrow(()->new BookingException("Room Category Not Found"));
+            if(!category.getHotel().getId().equals(hotel.getId())){
+                throw new BookingException("Room Category does not belong to this hotel");
 
-            lockKey = "booking:hotel:" + hotel.getId() + ":" + request.getRoomType();
+            }
+            lockKey = "booking:hotel:" + hotel.getId() + ":category:" + request.getRoomCategoryId();
             locked = redisLockService.acquireLock(lockKey);
+
+
 
             if (!locked) {
                 throw new BookingException(
@@ -47,10 +52,7 @@ public class BookingServices {
                 );
             }
 
-            List<Room> rooms =
-                    roomRepo.findByHotelIdAndRoomType(
-                            hotel.getId(),
-                            request.getRoomType());
+            List<Room> rooms = roomRepo.findByRoomCategoryId(category.getId());
 
             if (rooms.isEmpty()) {
                 throw new BookingException(MessageConstants.ROOM_NOT_FOUND);
@@ -85,6 +87,7 @@ public class BookingServices {
 
                 if (!overlap) {
                     selectedRoom = room;
+
                     break;
                 }
 
@@ -102,15 +105,12 @@ public class BookingServices {
                 throw new BookingException(MessageConstants.INVALID_DATES);
             }
 
-            BigDecimal totalPrice =
-                    selectedRoom.getPricePerNight()
-                            .multiply(BigDecimal.valueOf(days));
+            BigDecimal totalPrice = category.getPricePerNight().multiply(BigDecimal.valueOf(days));
 
             Booking booking = new Booking();
 
             booking.setUser(user);
             booking.setRoom(selectedRoom);
-            booking.setHotelName(hotel.getName());
             booking.setCheckInDate(request.getCheckInDate());
             booking.setCheckOutDate(request.getCheckOutDate());
             booking.setStatus(BookingStatus.PENDING);
@@ -123,6 +123,8 @@ public class BookingServices {
                 Thread.currentThread().interrupt();
             }
             return bookingRepo.save(booking);
+
+
         } finally {
             if (locked) {
                 redisLockService.releaseLock(lockKey);
@@ -166,40 +168,38 @@ public class BookingServices {
             throw new BookingException(MessageConstants.INVALID_CHECKOUT);
         }
 
-        Room room = booking.getRoom();
 
-        List<Booking> bookings =
-                bookingRepo.findByRoomIdAndStatus(
-                        room.getId(),
-                        BookingStatus.CONFIRMED);
+        Hotel hotel = booking.getRoom().getHotel();
 
-        for (Booking b : bookings) {
-
-            if (b.getId().equals(bookingId)) {
-                continue;
-            }
-
-            if (request.getCheckInDate().isBefore(b.getCheckOutDate())
-                    &&
-                    request.getCheckOutDate().isAfter(b.getCheckInDate())) {
-
-                throw new BookingException(
-                        MessageConstants.ROOM_ALREADY_BOOKED);
-            }
-
+        RoomCategory category =
+                roomCategoryRepository.findById(
+                                request.getRoomCategoryId())
+                        .orElseThrow(() ->
+                                new BookingException(
+                                        "Room Category Not Found"));
+        if(!category.getHotel().getId().equals(hotel.getId()))
+        {
+            throw new BookingException("Category does not belong to this hotel");
         }
+        Room selectedRoom = findAvailableRoom(
+                category.getId(),
+                request.getCheckInDate(),
+                request.getCheckOutDate(),
+                bookingId
+        );
 
         long days = ChronoUnit.DAYS.between(
                 request.getCheckInDate(),
                 request.getCheckOutDate());
 
         BigDecimal totalPrice =
-                room.getPricePerNight()
-                        .multiply(BigDecimal.valueOf(days));
+                selectedRoom.getRoomCategory().getPricePerNight().multiply(BigDecimal.valueOf(days));
 
         booking.setCheckInDate(request.getCheckInDate());
         booking.setCheckOutDate(request.getCheckOutDate());
+        booking.setRoom(selectedRoom);
         booking.setTotalPrice(totalPrice);
+        bookingRepo.save(booking);
 
     }
 
@@ -215,6 +215,49 @@ public class BookingServices {
         }
 
         booking.setStatus(BookingStatus.CANCELLED);
+    }
+
+    private Room findAvailableRoom(Long roomCategoryId, LocalDate checkIn, LocalDate checkOut, Long currentBookingId) {
+
+        List<Room> rooms = roomRepo.findByRoomCategoryId(roomCategoryId);
+
+        for (Room room : rooms) {
+            List<Booking> bookings = bookingRepo.findByRoomIdAndStatusIn(room.getId(),
+
+                            List.of(
+                                    BookingStatus.PENDING,
+                                    BookingStatus.CONFIRMED
+                            )
+
+                    );
+
+            boolean overlap = false;
+
+            for (Booking booking : bookings) {
+
+                if (currentBookingId != null &&
+                        booking.getId().equals(currentBookingId)) {
+                    continue;
+                }
+
+                if (checkIn.isBefore(booking.getCheckOutDate())
+                        &&
+                        checkOut.isAfter(booking.getCheckInDate())) {
+
+                    overlap = true;
+                    break;
+                }
+
+            }
+
+            if (!overlap) {
+                return room;
+            }
+
+        }
+
+        throw new BookingException(
+                MessageConstants.ROOM_NOT_AVAILABLE);
     }
 
 }

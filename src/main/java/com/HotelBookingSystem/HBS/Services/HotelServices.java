@@ -45,15 +45,15 @@ public class HotelServices {
 
             List<RoomResponse> rooms = hotel.getRooms()
                     .stream()
-                    .map(room -> new RoomResponse(
-                            room.getId(),
-                            room.getRoomNumber(),
-                            room.getPricePerNight(),
-                            room.getCapacity(),
-                            room.getRoomType(),
-                            room.getAvailable()
-                    ))
-                    .collect(Collectors.toList());
+                    .map(room -> RoomResponse.builder()
+                            .id(room.getId())
+                            .roomNumber(room.getRoomNumber())
+                            .roomType(room.getRoomCategory().getRoomType())
+                            .pricePerNight(room.getRoomCategory().getPricePerNight())
+                            .capacity(room.getRoomCategory().getCapacity())
+                            .build())
+
+                    .toList();
 
             return new HotelResponse(
                     hotel.getId(),

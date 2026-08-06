@@ -1,6 +1,5 @@
 package com.HotelBookingSystem.HBS.DTO;
 
-import com.HotelBookingSystem.HBS.Entity.RoomType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,16 +8,13 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class RoomResponse {
+public class UpdateRoomCategoryRequest {
+    private String name;
 
-    private Long id;
-    private Integer roomNumber;
     private BigDecimal pricePerNight;
+
     private Integer capacity;
-    private RoomType roomType;
-
-
 }
